@@ -52,7 +52,11 @@ class RefundService:
         if not order.delivery_date:
             return False, f"Pedido {order.id} não possui data de entrega registrada."
 
-        days_since_delivery = (now - order.delivery_date).days
+        delivery = order.delivery_date
+        if delivery.tzinfo is None:
+            delivery = delivery.replace(tzinfo=timezone.utc)
+
+        days_since_delivery = (now - delivery).days
         if days_since_delivery > self.MAX_REFUND_DAYS:
             return (
                 False,
