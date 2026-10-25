@@ -54,10 +54,10 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "src/atendente/api/main.py": {
-    "mtime": 1792954263.7602406,
-    "seen": 1792955324.2503319,
-    "ast_hash": "d944a6007034f47a272ce472aa1b9f76",
-    "semantic_hash": "d944a6007034f47a272ce472aa1b9f76"
+    "mtime": 1792958078.5385623,
+    "seen": 1792958255.1027513,
+    "ast_hash": "880437b83c8a450a04b61f27796da04e",
+    "semantic_hash": "880437b83c8a450a04b61f27796da04e"
   },
   "src/atendente/domain/__init__.py": {
     "mtime": 1792953642.6563454,
@@ -370,5 +370,41 @@
     "seen": 1792956958.6796732,
     "ast_hash": "3b7164804b90eaa939c1298c2ddd9c21",
     "semantic_hash": "3b7164804b90eaa939c1298c2ddd9c21"
+  },
+  "src/atendente/workers/celery_app.py": {
+    "mtime": 1792958125.8796954,
+    "seen": 1792958255.1052933,
+    "ast_hash": "897470e4fb8bc46877a47dd4cb058522",
+    "semantic_hash": "897470e4fb8bc46877a47dd4cb058522"
+  },
+  "src/atendente/workers/idempotency.py": {
+    "mtime": 1792958078.4619124,
+    "seen": 1792958255.1052933,
+    "ast_hash": "966c3585438e13e86b4078fb956b0b3f",
+    "semantic_hash": "966c3585438e13e86b4078fb956b0b3f"
+  },
+  "src/atendente/workers/security.py": {
+    "mtime": 1792958078.5385623,
+    "seen": 1792958255.1052933,
+    "ast_hash": "f431f39d3ffb85907fde8e0b80098247",
+    "semantic_hash": "f431f39d3ffb85907fde8e0b80098247"
+  },
+  "src/atendente/workers/tasks.py": {
+    "mtime": 1792958168.0055664,
+    "seen": 1792958255.1052933,
+    "ast_hash": "c10b8cf5639cb0430b885f7190dbadc3",
+    "semantic_hash": "c10b8cf5639cb0430b885f7190dbadc3"
+  },
+  "tests/integration/test_api_webhooks.py": {
+    "mtime": 1792958078.4635751,
+    "seen": 1792958255.1052933,
+    "ast_hash": "acacbf13f287437263b0b9fc294f5de9",
+    "semantic_hash": "acacbf13f287437263b0b9fc294f5de9"
+  },
+  "tests/unit/test_webhooks_and_workers.py": {
+    "mtime": 1792958078.464183,
+    "seen": 1792958255.1066504,
+    "ast_hash": "0b90aaa508bfa5121fc073c046240716",
+    "semantic_hash": "0b90aaa508bfa5121fc073c046240716"
   }
 }

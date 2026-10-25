@@ -200,5 +200,24 @@ class ToolResult(BaseModel, Generic[T]):
 | `history` | 1000 | Compactação via sumário + preservação das últimas mensagens |
 | **Total Máximo** | **3000** | Invariante garantida por testes automatizados |
 
+---
+
+## 11. Detalhamento da Fase 4: Assincronismo e Webhooks
+
+### 11.1 Modelo de Ameaças (STRIDE — `security-and-hardening`)
+| Ameaça | Vetor na Fronteira `/webhook/messages` | Mitigação Implementada |
+|---|---|---|
+| **Spoofing** | Atacante envia mensagens falsas fingindo ser o canal WhatsApp/Web. | Verificação obrigatória de assinatura **HMAC-SHA256** (`X-Hub-Signature-256`) com `hmac.compare_digest` em tempo constante. |
+| **Tampering** | Alteração do corpo JSON (ex: trocar valor ou `customer_id`) em trânsito. | O HMAC é calculado sobre os bytes brutos (`raw_body`) concatenados ao timestamp antes do parse JSON. |
+| **Replay / Duplicação** | Reenvio malicioso ou retentativa de rede do mesmo evento. | Janela de validade de timestamp (`X-Webhook-Timestamp`, tolerância máxima de 300s) + chave de idempotência atômica `SETNX` com TTL de 24h (`webhook:idemp:{message_id}`). |
+| **Denial of Service** | Flood de mensagens ou lentidão do LLM travando workers HTTP. | Endpoint HTTP responde `202 Accepted` em `< 50ms` após enfileirar no Celery/Redis; limite de tamanho do payload e validação estrita de schema Pydantic. |
+
+### 11.2 Fila Assíncrona, Retentativas e Dead Letter Queue (`src/atendente/workers/`)
+- **Idempotência (`IdempotencyStore`):** Interface com implementação Redis (`SET name value NX EX 86400`) e implementação em memória thread-safe para testes desconectados.
+- **Worker Celery (`celery_app.py` e `tasks.py`):**
+  - Tarefa `process_webhook_message_task`: executa com até 3 retentativas e **backoff exponencial** (`2^attempt` segundos) para erros transitórios (`TransientWorkerError`, `ConnectionError`, `TimeoutError`).
+  - **Dead Letter Queue (`dlq_unhandled_messages`):** Após esgotar as retentativas máximas (ou em falhas permanentes não recuperáveis), a mensagem, o erro, o número de tentativas e o timestamp são gravados na DLQ (`DLQStore`) para inspeção e reprocessamento seguro.
+
+
 
 
