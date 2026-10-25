@@ -31,6 +31,7 @@ from atendente.infra.db.repositories import (
     RefundRepository,
     TicketRepository,
 )
+from atendente.rag.retriever import HybridRetriever
 from atendente.tools.base import ToolResult
 
 # --- Schemas de Entrada das Tools ---
@@ -110,6 +111,7 @@ class NovaLojaToolsService:
         audit_repo: AuditRepository,
         refund_service: RefundService | None = None,
         ticket_service: TicketService | None = None,
+        retriever: HybridRetriever | None = None,
     ):
         self.customer_repo = customer_repo
         self.order_repo = order_repo
@@ -120,6 +122,7 @@ class NovaLojaToolsService:
         self.audit_repo = audit_repo
         self.refund_service = refund_service or RefundService()
         self.ticket_service = ticket_service or TicketService()
+        self.retriever = retriever
 
     def _serialize_data(self, data: Any) -> Any:
         if data is None:
@@ -402,7 +405,39 @@ class NovaLojaToolsService:
         self, payload: BuscarBaseConhecimentoInput
     ) -> ToolResult[list[dict[str, Any]]]:
         start = time.perf_counter()
-        # Interface padrão da Tool: integrada com RAG na Fase 2
+        if self.retriever:
+            retrieved = await self.retriever.retrieve(
+                query=payload.query, segment=payload.segmento, limit=payload.limit
+            )
+            if not retrieved:
+                res_empty: ToolResult[list[dict[str, Any]]] = ToolResult.fail(
+                    code="NO_RELEVANT_KNOWLEDGE",
+                    message="Não encontramos informações com relevância suficiente na base de conhecimento sobre este assunto.",
+                    retryable=False,
+                    details={"abstained": True, "query": payload.query},
+                )
+                await self._audit(
+                    "buscar_base_conhecimento", None, payload.model_dump(), start, res_empty
+                )
+                return res_empty
+
+            data = [
+                {
+                    "title": r.chunk.title,
+                    "section": r.chunk.section,
+                    "breadcrumbs": r.chunk.breadcrumbs,
+                    "content": r.chunk.content,
+                    "source": r.chunk.source_file,
+                    "score": r.score,
+                    "citation": r.citation,
+                }
+                for r in retrieved
+            ]
+            res_ok: ToolResult[list[dict[str, Any]]] = ToolResult.ok(data)
+            await self._audit("buscar_base_conhecimento", None, payload.model_dump(), start, res_ok)
+            return res_ok
+
+        # Fallback para ambiente isolado sem retriever instanciado
         mock_results = [
             {
                 "title": "Política de Trocas e Devoluções",
@@ -411,9 +446,9 @@ class NovaLojaToolsService:
                 "score": 0.95,
             }
         ]
-        res = ToolResult.ok(mock_results)
-        await self._audit("buscar_base_conhecimento", None, payload.model_dump(), start, res)
-        return res
+        res_mock: ToolResult[list[dict[str, Any]]] = ToolResult.ok(mock_results)
+        await self._audit("buscar_base_conhecimento", None, payload.model_dump(), start, res_mock)
+        return res_mock
 
     # 8. transferir_para_humano
     async def transferir_para_humano(
