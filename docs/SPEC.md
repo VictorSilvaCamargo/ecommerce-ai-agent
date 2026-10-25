@@ -218,6 +218,23 @@ class ToolResult(BaseModel, Generic[T]):
   - Tarefa `process_webhook_message_task`: executa com até 3 retentativas e **backoff exponencial** (`2^attempt` segundos) para erros transitórios (`TransientWorkerError`, `ConnectionError`, `TimeoutError`).
   - **Dead Letter Queue (`dlq_unhandled_messages`):** Após esgotar as retentativas máximas (ou em falhas permanentes não recuperáveis), a mensagem, o erro, o número de tentativas e o timestamp são gravados na DLQ (`DLQStore`) para inspeção e reprocessamento seguro.
 
+---
+
+## 12. Detalhamento da Fase 5: Observabilidade, Evals e Ciclo de Debug
+
+### 12.1 Perguntas Operacionais de Plantão (`observability-and-instrumentation`)
+1. *Qual é a latência p95 e taxa de erro por nó do LangGraph e por Tool?* -> Métricas RED em `/metrics` (Prometheus) e painel Grafana (`infra/grafana/`).
+2. *Qual versão/hash de prompt, chunks recuperados e custo em USD geraram uma resposta específica?* -> `TraceCollector` (Langfuse) com spans estruturados por etapa e `prompt_hash`.
+3. *Há vazamento de PII nos logs estruturados?* -> Processador `mask_pii_processor` no `structlog` mascarando CPF, CNPJ, e-mail e telefone antes da serialização JSON.
+4. *Quais documentos da base nunca são recuperados (chunks órfãos) ou têm baixa relevância?* -> `RetrievalMonitor` (`src/atendente/rag/monitor.py`).
+
+### 12.2 Suíte de Evals (>= 80 Casos) e Juiz com Rubricas Versionadas (`evals/`)
+- Dataset `evals/datasets/novaloja_eval_dataset.json` com **85 casos rotulados**.
+- Métricas determinísticas: acurácia de intenção, acerto de Tool e argumentos, handoff correto e taxa de execução de ação sensível sem confirmação (**meta estrita: 0%**).
+- Juiz (`LLMJudge`) com 4 rubricas versionadas (`faithfulness`, `tone`, `completeness`, `safety`) calibrado sobre amostra rotulada manualmente.
+- Conversor `trace-to-test` (`make trace-to-test TRACE_ID=...`) que transforma qualquer trace anômalo em caso regressivo do dataset.
+
+
 
 
 

@@ -1,10 +1,11 @@
-from collections.abc import AsyncGenerator
+import time
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from atendente.domain.models import ContractSLA, Customer, Invoice, Order, RefundRequest, Ticket
@@ -18,6 +19,11 @@ from atendente.infra.db.repositories import (
     OrderRepository,
     RefundRepository,
     TicketRepository,
+)
+from atendente.infra.observability import (
+    FeedbackInput,
+    ObservabilityManager,
+    configure_structured_logging,
 )
 from atendente.tools.base import ToolResult
 from atendente.tools.schemas import get_tool_definitions
@@ -41,11 +47,14 @@ from atendente.workers.tasks import (
     WebhookMessagePayload,
 )
 
+configure_structured_logging()
+
 # Gerenciadores globais de infraestrutura
 db_manager = DatabaseManager(settings.database_url)
 audit_repository: AuditRepository = InMemoryAuditRepository()
 idempotency_store: IdempotencyStore = InMemoryIdempotencyStore()
 dlq_store: DLQStore = InMemoryDLQStore()
+observability_manager = ObservabilityManager()
 
 
 @asynccontextmanager
@@ -67,6 +76,22 @@ app = FastAPI(
     description="API de Atendimento Inteligente da NovaLoja com Tools e Function Calling padronizado.",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def record_http_metrics_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration_ms = (time.perf_counter() - start) * 1000.0
+    observability_manager.record_http_request(
+        method=request.method,
+        path=request.url.path,
+        status_code=response.status_code,
+        duration_ms=duration_ms,
+    )
+    return response
 
 
 # --- Tratamento Padronizado de Erros ---
@@ -304,3 +329,35 @@ async def receive_webhook_message(
 async def inspect_dlq_messages() -> list[DLQEntry]:
     """Lista mensagens irrecuperáveis encaminhadas para a Dead Letter Queue."""
     return await dlq_store.list_entries()
+
+
+# --- Endpoints de Observabilidade e Feedback (Fase 5) ---
+
+
+@app.get("/metrics", tags=["Observabilidade"], response_class=PlainTextResponse)
+async def get_prometheus_metrics() -> PlainTextResponse:
+    """Exporta métricas RED e de negócio no formato de texto Prometheus 0.0.4."""
+    return PlainTextResponse(
+        content=observability_manager.render_prometheus_metrics(),
+        media_type="text/plain; version=0.0.4; charset=utf-8",
+    )
+
+
+@app.post(
+    "/feedback",
+    tags=["Observabilidade"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def submit_user_feedback(payload: FeedbackInput) -> dict[str, Any]:
+    """Registra feedback explícito (thumbs up/down) vinculado a um trace_id."""
+    linked = observability_manager.record_feedback(
+        trace_id=payload.trace_id,
+        score=payload.score,
+        comment=payload.comment,
+    )
+    return {
+        "status": "recorded",
+        "trace_id": payload.trace_id,
+        "score": payload.score,
+        "trace_linked": linked,
+    }

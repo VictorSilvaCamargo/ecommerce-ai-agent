@@ -46,6 +46,44 @@ services:
       timeout: 5s
       retries: 5
 
+  langfuse-server:
+    image: langfuse/langfuse:2
+    container_name: atendente_langfuse
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://novaloja:novalojapass@postgres:5432/novaloja_db
+      NEXTAUTH_SECRET: novaloja-langfuse-secret-dev
+      SALT: novaloja-langfuse-salt-dev
+      NEXTAUTH_URL: http://localhost:3000
+      TELEMETRY_ENABLED: "false"
+    ports:
+      - "3000:3000"
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: atendente_prometheus
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: atendente_grafana
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+
 volumes:
   postgres_data:
   mongodb_data:

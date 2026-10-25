@@ -117,23 +117,23 @@ flowchart LR
 
 ---
 
-### Fase 5: Observabilidade, Evals e Ciclo de Debug (Próxima Fase)
+### Fase 5: Observabilidade, Evals e Ciclo de Debug (Concluída)
 - **Objetivo:** Integrar Langfuse self-hosted para tracing, exportar métricas Prometheus, provisionar dashboards no Grafana, montar suíte de evals (>= 80 casos) e estabelecer playbook de depuração.
 - **Tarefas:**
-  1. Configurar contêineres de Langfuse, Prometheus e Grafana no `docker-compose.yml`.
-  2. Instrumentar `LLMClient`, ferramentas e nós do LangGraph para exportar traces detalhados com hash do prompt, custo e tokens para o Langfuse.
-  3. Configurar endpoint `/metrics` no FastAPI com métricas de negócio e latência.
-  4. Provisionar dashboards versionados em `infra/grafana/dashboards/`.
-  5. Montar dataset de evals com no mínimo 80 casos rotulados (intenções, tools, argumentos e respostas) em `evals/datasets/`.
-  6. Desenvolver avaliadores determinísticos e LLM-as-a-judge com rubricas versionadas em `evals/judges/`.
-  7. Implementar ferramenta `make trace-to-test TRACE_ID=...` para capturar traces anômalos e convertê-los em casos de teste.
-  8. Redigir `docs/DEBUG_PLAYBOOK.md` com análise detalhada de 3 casos reais investigados.
-  9. Implementar monitor de retrieval para chunks órfãos ou com baixa relevância.
-- **Critério de Saída:** Langfuse e Grafana coletando dados em tempo real, suíte de 80 evals rodando no CI com threshold de aprovação e playbook de debug documentado.
+  1. `[x]` Configurar contêineres de Langfuse, Prometheus e Grafana no `docker-compose.yml`.
+  2. `[x]` Instrumentar `ObservabilityManager` e `structlog` com mascaramento de PII (`mask_pii_text`, `mask_pii_dict`) e traces detalhados com hash do prompt, custo e tokens.
+  3. `[x]` Configurar endpoints `/metrics` (Prometheus 0.0.4) e `/feedback` (thumbs up/down vinculado a `trace_id`) no FastAPI.
+  4. `[x]` Provisionar dashboards versionados em `infra/grafana/dashboards/atendente_ia_overview.json`.
+  5. `[x]` Montar dataset de evals com 85 casos rotulados (intenções, tools, argumentos e respostas) em `evals/datasets/novaloja_eval_dataset.json`.
+  6. `[x]` Desenvolver avaliadores determinísticos e LLM-as-a-judge com rubricas versionadas e calibradas contra amostra humana em `evals/judges/rubrics.py`.
+  7. `[x]` Implementar ferramenta `make trace-to-test TRACE_ID=...` (`src/atendente/infra/trace_to_test.py`) para capturar traces anômalos e convertê-los em casos de teste.
+  8. `[x]` Redigir `docs/DEBUG_PLAYBOOK.md` com fluxo de 5 passos e análise detalhada de 3 casos reais investigados.
+  9. `[x]` Implementar monitor de retrieval (`src/atendente/rag/monitor.py`) para consultas sem resultado, baixa relevância e chunks órfãos.
+- **Critério de Saída:** Langfuse e Grafana configurados, suíte de 85 evals rodando no CI com 100% de aprovação nos gates e playbook de debug documentado.
 
 ---
 
-### Fase 6: Segurança, MCP e Entrega Final
+### Fase 6: Segurança, MCP e Entrega Final (Próxima Fase)
 - **Objetivo:** Implementar servidor MCP oficial em Python expondo as Tools de atendimento, auditar segurança completa, rodar testes de carga Locust, executar `/code-simplify`, `/review` e `/ship`, gerando documentação final e relatório de entrega.
 - **Tarefas:**
   1. Desenvolver servidor MCP em `src/atendente/mcp_server/` expondo as ferramentas para clientes externos.

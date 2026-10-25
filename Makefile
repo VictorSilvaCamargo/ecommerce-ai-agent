@@ -1,4 +1,4 @@
-.PHONY: dev test lint format check seed ingest run
+.PHONY: dev test lint format check seed ingest run trace-to-test evals
 
 dev:
 	docker compose up -d
@@ -25,3 +25,9 @@ seed:
 
 run:
 	uv run uvicorn atendente.api.main:app --reload --port 8000
+
+trace-to-test:
+	uv run python -m atendente.infra.trace_to_test --trace-id $(TRACE_ID)
+
+evals:
+	uv run python -m evals.runners.run_evals
