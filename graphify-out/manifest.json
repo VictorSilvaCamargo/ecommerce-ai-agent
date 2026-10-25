@@ -30,10 +30,10 @@
     "semantic_hash": "31e5d3afc1695432116c2ab9f4e6af7f"
   },
   "pyproject.toml": {
-    "mtime": 1792959438.0322871,
-    "seen": 1792959646.1870053,
-    "ast_hash": "704232760a730f1b0d9342eda8b36a1f",
-    "semantic_hash": "704232760a730f1b0d9342eda8b36a1f"
+    "mtime": 1792961075.1906044,
+    "seen": 1792961334.10494,
+    "ast_hash": "6a67cb1007fe5056de430ae8893422e2",
+    "semantic_hash": "6a67cb1007fe5056de430ae8893422e2"
   },
   "src/atendente/__init__.py": {
     "mtime": 1792953635.475686,
@@ -504,5 +504,41 @@
     "seen": 1792959646.2002215,
     "ast_hash": "52771a02c2e02cabc6cedf264bcbdf7c",
     "semantic_hash": "52771a02c2e02cabc6cedf264bcbdf7c"
+  },
+  "src/atendente/agent/guardrails.py": {
+    "mtime": 1792961125.344628,
+    "seen": 1792961334.10494,
+    "ast_hash": "f80ef723358f332659a63eb86754f4c0",
+    "semantic_hash": "f80ef723358f332659a63eb86754f4c0"
+  },
+  "src/atendente/mcp_server/server.py": {
+    "mtime": 1792961125.344628,
+    "seen": 1792961334.1099546,
+    "ast_hash": "a12c93b3b2891647617d9dad4337cb00",
+    "semantic_hash": "a12c93b3b2891647617d9dad4337cb00"
+  },
+  "tests/integration/test_api_latency_benchmark.py": {
+    "mtime": 1792960978.8344855,
+    "seen": 1792961334.1130226,
+    "ast_hash": "8c3acfe7509c8811431d18d50957f501",
+    "semantic_hash": "8c3acfe7509c8811431d18d50957f501"
+  },
+  "tests/integration/test_mcp_server.py": {
+    "mtime": 1792960788.4159465,
+    "seen": 1792961334.1140225,
+    "ast_hash": "63fc60556cba16f1c21adfd5d1bc2d3b",
+    "semantic_hash": "63fc60556cba16f1c21adfd5d1bc2d3b"
+  },
+  "tests/load/locustfile.py": {
+    "mtime": 1792961125.2353342,
+    "seen": 1792961334.1140225,
+    "ast_hash": "15d89e6dd61f4fff655130810749e7af",
+    "semantic_hash": "15d89e6dd61f4fff655130810749e7af"
+  },
+  "tests/security/test_security_guardrails.py": {
+    "mtime": 1792960270.1714883,
+    "seen": 1792961334.1140225,
+    "ast_hash": "4684f5182bbeb6d6e4013cbb04e4f8ce",
+    "semantic_hash": "4684f5182bbeb6d6e4013cbb04e4f8ce"
   }
 }
