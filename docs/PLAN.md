@@ -93,18 +93,18 @@ flowchart LR
 
 ---
 
-### Fase 3b: Engenharia de Prompts e Janela de Contexto (Próxima Fase)
+### Fase 3b: Engenharia de Prompts e Janela de Contexto (Concluída)
 - **Objetivo:** Estruturar catálogo versionado de prompts com orçamentação rígida de tokens por seção, proteção contra injection e benchmarks comparativos.
 - **Tarefas:**
-  1. Criar estrutura versionada em `src/atendente/agent/prompts/` (sistema, classificação, RAG, resposta).
-  2. Aplicar técnicas de engenharia: instruções por papel, few-shot por intenção, saída estruturada por schema Pydantic, delimitação de contexto RAG com tags seguras e checklist de autoverificação.
-  3. Implementar verificador estrito de orçamento de tokens por seção (sistema, histórico, RAG, tools).
-  4. Comparar no mínimo 3 versões de prompts e registrar resultados em `docs/EVALS.md`.
-- **Critério de Saída:** Testes garantindo que os prompts respeitam os limites de orçamento de tokens e que injeções no contexto do RAG são neutralizadas.
+  1. `[x]` Criar estrutura versionada em `src/atendente/agent/prompts/` (`system.py`, `classifier.py`, `rag_delimiters.py`, `budget.py`, `evaluator.py`, `CHANGELOG.md`).
+  2. `[x]` Aplicar técnicas de engenharia: instruções por papel, few-shot por intenção, saída estruturada por schema Pydantic (`IntentClassificationOutput`), delimitação de contexto RAG com tags seguras `<contexto_seguro>` e checklist de autoverificação.
+  3. `[x]` Implementar verificador estrito de orçamento de tokens por seção (`system`, `history`, `rag`, `tools`) com teste de propriedade Hypothesis.
+  4. `[x]` Comparar 3 versões de prompts (`v1.0.0`, `v2.0.0`, `v3.0.0`) e registrar resultados em `docs/EVALS.md`.
+- **Critério de Saída:** Testes garantindo que os prompts respeitam os limites de orçamento de tokens e que injeções no contexto do RAG são neutralizadas (79 testes aprovados, 92% de cobertura).
 
 ---
 
-### Fase 4: Assincronismo e Webhooks
+### Fase 4: Assincronismo e Webhooks (Próxima Fase)
 - **Objetivo:** Implementar recepção de webhooks protegida por HMAC SHA-256, fila assíncrona com Celery + Redis, controle de idempotência e Dead Letter Queue.
 - **Tarefas:**
   1. Implementar middleware/dependência FastAPI de validação de assinatura HMAC no endpoint `/webhook/messages`.

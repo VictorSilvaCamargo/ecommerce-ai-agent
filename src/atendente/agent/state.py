@@ -34,3 +34,5 @@ class ConversationState(BaseModel):
     summary: str | None = None
     last_tool_result: dict[str, Any] | None = None
     last_response: str | None = None
+    prompt_version: str = "v3.0.0"
+    prompt_hash: str | None = None

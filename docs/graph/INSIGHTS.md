@@ -33,3 +33,11 @@ Registro evolutivo das métricas topológicas, nós centrais, acoplamentos e nó
 - **Acoplamentos e Conexões:** `agent` consome `tools` e `rag` respeitando a arquitetura hexagonal (3/3 contratos do `import-linter` rigorosamente preservados). Camada `infra/llm` disponibiliza abstração unificada `LLMClient` permitindo testes 100% determinísticos via `MockLLMClient`.
 - **Módulos Órfãos / Fracos:** Apenas `workers/` (Fase 4) e `mcp_server/` (Fase 6) permanecem com `__init__.py`.
 - **Ajustes e Correções:** Ciclo de `doubt-driven-development` identificou e neutralizou risco crítico de vazamento de confirmação (`action_confirmed` herdado entre turnos); gatekeeper agora exige estado estritamente pendente e intenção afirmativa no turno subsequente. Sumarização periódica e checkpointing no `MemorySaver` garantiram estabilidade e preservação contextual em conversas de 10+ turnos. Suíte ampliada para 71 testes com 91% de cobertura.
+
+---
+
+### Fase 3b: Engenharia de Prompts e Janela de Contexto
+- **Nós Centrais:** `ContextBudgetManager` (`budget.py`), `PromptVersion` (`system.py`) e `format_rag_context_safe` (`rag_delimiters.py`) surgiram como sub-hubs na comunidade do agente, expandindo o grafo para 631 nós e 1619 arestas em 30 comunidades.
+- **Acoplamentos e Conexões:** O subpacote `src/atendente/agent/prompts/` foi integrado de forma unidirecional ao `AgentNodeHandler` e `ConversationState` sem introduzir dependências circulares ou violar os 3 contratos do `import-linter`.
+- **Módulos Órfãos / Fracos:** Apenas `workers/` (Fase 4) e `mcp_server/` (Fase 6) aguardam implementação.
+- **Ajustes e Correções:** Implementada alocação estrita de orçamento de tokens por seção (`system`, `tools`, `rag`, `history`) validada via Hypothesis, sanitização de *indirect prompt injection* com tags XML `<contexto_seguro>` e avaliação comparativa de 3 versões (`v1.0.0`, `v2.0.0`, `v3.0.0`), elevando o score global de 0.00 para 1.00 em `docs/EVALS.md`.

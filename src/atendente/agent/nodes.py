@@ -1,6 +1,8 @@
 import re
 from typing import Any
 
+from atendente.agent.prompts.rag_delimiters import sanitize_untrusted_rag_text
+from atendente.agent.prompts.system import get_system_prompt
 from atendente.agent.state import ConversationState
 from atendente.domain.validators import validate_cnpj, validate_cpf
 from atendente.infra.llm.client import LLMClient
@@ -360,20 +362,24 @@ class AgentNodeHandler:
                 )
         elif state.retrieved_docs:
             top_doc = state.retrieved_docs[0]
-            content = top_doc.get("content", "")
+            raw_content = str(top_doc.get("content", ""))
+            clean_content, _ = sanitize_untrusted_rag_text(raw_content)
             source = top_doc.get("source_file", "Base NovaLoja")
-            response_text = (
-                f"De acordo com nossas políticas oficiais ({source}): {content[:300]}..."
-            )
+            response_text = f"De acordo com nossas políticas oficiais ({source}) [Fonte: {source}]: {clean_content[:300]}..."
         else:
             response_text = (
                 "Olá! Sou o Atendente Virtual da NovaLoja. Como posso ajudar você hoje com seus pedidos, "
                 "faturas, contratos ou dúvidas?"
             )
 
+        prompt_obj = get_system_prompt(state.prompt_version)
         updated_messages = list(state.messages)
         updated_messages.append({"role": "assistant", "content": response_text})
-        return {"messages": updated_messages, "last_response": response_text}
+        return {
+            "messages": updated_messages,
+            "last_response": response_text,
+            "prompt_hash": prompt_obj.sha256_hash,
+        }
 
     async def evaluate_handoff(self, state: ConversationState) -> dict[str, Any]:
         """Avalia condições de transbordo e transfere para atendente humano."""
