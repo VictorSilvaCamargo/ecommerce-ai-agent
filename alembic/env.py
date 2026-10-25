@@ -1,10 +1,12 @@
 import asyncio
 import os
 from logging.config import fileConfig
-from alembic import context
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
+from alembic import context
 from atendente.infra.db.models import Base
 
 config = context.config
@@ -15,8 +17,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 database_url = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://novaloja:novalojapass@localhost:5432/novaloja_db"
+    "DATABASE_URL", "postgresql+psycopg://novaloja:novalojapass@localhost:5432/novaloja_db"
 )
 config.set_main_option("sqlalchemy.url", database_url)
 

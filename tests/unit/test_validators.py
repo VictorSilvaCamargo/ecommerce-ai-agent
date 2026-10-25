@@ -1,11 +1,13 @@
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
+
 from atendente.domain.validators import (
-    validate_cpf,
-    validate_cnpj,
-    validate_document,
     DocumentType,
-    clean_digits
+    clean_digits,
+    validate_cnpj,
+    validate_cpf,
+    validate_document,
 )
 
 

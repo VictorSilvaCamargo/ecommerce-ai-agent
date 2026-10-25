@@ -50,3 +50,10 @@ Este documento registra todas as skills disponíveis no ambiente, seus caminhos 
 | **Fase 0** | `planning-and-task-breakdown` | Fallback Obrigatório (`SKILL.md`) | Elaboração do roadmap completo das 7 fases em `docs/PLAN.md` com fatiamento vertical e critérios de saída estritos. |
 | **Fase 0** | `graphify` | CLI nativo + Engine Python | Primeiro grafo de conhecimento gerado com 20 nós, 16 arestas e 5 comunidades. Exportados `graph.html`, `graph.json` e `docs/graph/GRAPH_REPORT_fase-0.md`. |
 | **Fase 0** | `git-workflow-and-versioning` | Fallback / Prática Direta | Criação da branch `fase-0-descoberta-e-especificacao` e commits convencionais estruturados. |
+| **Fase 1** | `api-and-interface-design` | Fallback Obrigatório (`SKILL.md`) | Definição dos contratos canônicos `ToolResult[T]` e `ToolError(code, message, retryable, details)`, schemas OpenAPI e 8 Tools. |
+| **Fase 1** | `deprecation-and-migration` | Fallback Obrigatório (`SKILL.md`) | Configuração do Alembic com migração inicial seguindo padrão expand/contract e scripts de seed. |
+| **Fase 1** | `test-driven-development` | Fallback Obrigatório (`SKILL.md`) | Ciclo Red-Green com 41 testes unitários, testes de contrato OpenAPI e testes de propriedade via Hypothesis. Cobertura de 88%. |
+| **Fase 1** | `incremental-implementation` | Fallback Obrigatório (`SKILL.md`) | Implementação em fatias finas: validadores -> modelos -> DB/Alembic -> audit -> tools -> FastAPI -> contratos. |
+| **Fase 1** | `security-and-hardening` | Fallback Obrigatório (`SKILL.md`) | Autenticação via API Key, proteção contra IDOR em pedidos e reembolsos, gatekeeper para ações sensíveis e parameterized queries. |
+| **Fase 1** | `graphify` | CLI nativo + Engine Python | Grafo atualizado para 222 nós e 510 arestas. Comprovada ausência de dependência de `domain` para `infra` via `graphify path`. |
+| **Fase 1** | `git-workflow-and-versioning` | Fallback / Prática Direta | Branch `fase-1-fundacao-e-tools-api` criada, commits atômicos com Conventional Commits. |

@@ -1,49 +1,50 @@
-from datetime import date, datetime, timezone
-from enum import Enum
-from typing import Optional
+from datetime import UTC, date, datetime
+from enum import StrEnum
 from uuid import uuid4
+
 from pydantic import BaseModel, ConfigDict, Field
-from atendente.domain.validators import DocumentType, validate_cpf, validate_cnpj
+
+from atendente.domain.validators import DocumentType, validate_cnpj, validate_cpf
 
 
-class CustomerSegment(str, Enum):
+class CustomerSegment(StrEnum):
     B2C = "B2C"
     B2B = "B2B"
 
 
-class OrderStatus(str, Enum):
+class OrderStatus(StrEnum):
     PROCESSING = "PROCESSING"
     SHIPPED = "SHIPPED"
     DELIVERED = "DELIVERED"
     CANCELLED = "CANCELLED"
 
 
-class RefundStatus(str, Enum):
+class RefundStatus(StrEnum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
 
 
-class TicketPriority(str, Enum):
+class TicketPriority(StrEnum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
 
-class TicketStatus(str, Enum):
+class TicketStatus(StrEnum):
     OPEN = "OPEN"
     IN_PROGRESS = "IN_PROGRESS"
     RESOLVED = "RESOLVED"
 
 
-class ContractTier(str, Enum):
+class ContractTier(StrEnum):
     GOLD = "GOLD"
     PLATINUM = "PLATINUM"
     ENTERPRISE = "ENTERPRISE"
 
 
-class InvoiceStatus(str, Enum):
+class InvoiceStatus(StrEnum):
     PAID = "PAID"
     OPEN = "OPEN"
     OVERDUE = "OVERDUE"
@@ -59,7 +60,7 @@ class Customer(BaseModel):
     segment: CustomerSegment
     email: str
     phone: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     def validate_doc(self) -> bool:
         if self.doc_type == DocumentType.CPF:
@@ -84,9 +85,9 @@ class Order(BaseModel):
     items: list[OrderItem]
     total_cents: int
     status: OrderStatus
-    delivery_date: Optional[datetime] = None
-    tracking_code: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    delivery_date: datetime | None = None
+    tracking_code: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class RefundRequest(BaseModel):
@@ -99,7 +100,7 @@ class RefundRequest(BaseModel):
     amount_cents: int
     status: RefundStatus = RefundStatus.PENDING
     eligible: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class Ticket(BaseModel):
@@ -112,7 +113,7 @@ class Ticket(BaseModel):
     priority: TicketPriority = TicketPriority.MEDIUM
     sla_hours: int = 24
     status: TicketStatus = TicketStatus.OPEN
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ContractSLA(BaseModel):
@@ -125,7 +126,7 @@ class ContractSLA(BaseModel):
     resolution_sla_hours: int
     account_manager: str
     active: bool = True
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class Invoice(BaseModel):
@@ -139,4 +140,4 @@ class Invoice(BaseModel):
     barcode: str
     due_date: date
     pdf_url: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

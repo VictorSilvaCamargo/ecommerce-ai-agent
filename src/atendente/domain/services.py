@@ -1,15 +1,15 @@
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime
 from uuid import uuid4
+
 from atendente.domain.models import (
+    ContractSLA,
+    ContractTier,
     CustomerSegment,
     Order,
     OrderStatus,
     RefundRequest,
     RefundStatus,
     TicketPriority,
-    ContractSLA,
-    ContractTier
 )
 
 
@@ -34,9 +34,7 @@ class RefundService:
     MAX_REFUND_DAYS = 7
 
     def check_eligibility(
-        self,
-        order: Order,
-        current_time: Optional[datetime] = None
+        self, order: Order, current_time: datetime | None = None
     ) -> tuple[bool, str]:
         """
         Verifica se o pedido pode ser reembolsado.
@@ -44,40 +42,39 @@ class RefundService:
         1. Pedido precisa estar com status DELIVERED.
         2. Data de entrega não pode ser superior a 7 dias corridos.
         """
-        now = current_time or datetime.now(timezone.utc)
+        now = current_time or datetime.now(UTC)
 
         if order.status != OrderStatus.DELIVERED:
-            return False, f"Pedido {order.id} não foi entregue (status atual: {order.status.value})."
+            return (
+                False,
+                f"Pedido {order.id} não foi entregue (status atual: {order.status.value}).",
+            )
 
         if not order.delivery_date:
             return False, f"Pedido {order.id} não possui data de entrega registrada."
 
         delivery = order.delivery_date
         if delivery.tzinfo is None:
-            delivery = delivery.replace(tzinfo=timezone.utc)
+            delivery = delivery.replace(tzinfo=UTC)
 
         days_since_delivery = (now - delivery).days
         if days_since_delivery > self.MAX_REFUND_DAYS:
             return (
                 False,
                 f"Prazo legal de {self.MAX_REFUND_DAYS} dias para devolução/arrependimento "
-                f"expirado (entregue há {days_since_delivery} dias)."
+                f"expirado (entregue há {days_since_delivery} dias).",
             )
 
         return True, "Pedido elegível para devolução e reembolso integral."
 
     def create_refund(
-        self,
-        order: Order,
-        reason: str,
-        confirmed: bool,
-        current_time: Optional[datetime] = None
+        self, order: Order, reason: str, confirmed: bool, current_time: datetime | None = None
     ) -> RefundRequest:
         """
         Cria a solicitação de reembolso.
         Exige elegibilidade estrita e confirmação explícita (ação sensível).
         """
-        now = current_time or datetime.now(timezone.utc)
+        now = current_time or datetime.now(UTC)
         eligible, eligibility_reason = self.check_eligibility(order, now)
 
         if not eligible:
@@ -97,7 +94,7 @@ class RefundService:
             amount_cents=order.total_cents,
             status=RefundStatus.APPROVED,
             eligible=True,
-            created_at=now
+            created_at=now,
         )
 
 
@@ -139,11 +136,13 @@ class TicketService:
         self,
         segment: CustomerSegment,
         priority: TicketPriority,
-        contract: Optional[ContractSLA] = None
+        contract: ContractSLA | None = None,
     ) -> int:
         """Calcula o SLA em horas baseado no segmento e contrato do cliente."""
         if segment == CustomerSegment.B2B and contract and contract.active:
-            tier_matrix = self.B2B_SLA_MATRIX.get(contract.tier, self.B2B_SLA_MATRIX[ContractTier.GOLD])
+            tier_matrix = self.B2B_SLA_MATRIX.get(
+                contract.tier, self.B2B_SLA_MATRIX[ContractTier.GOLD]
+            )
             return tier_matrix.get(priority, 24)
 
         return self.B2C_SLA_MATRIX.get(priority, 48)

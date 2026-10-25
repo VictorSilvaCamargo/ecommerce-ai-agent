@@ -1,33 +1,31 @@
 from collections.abc import Sequence
-from datetime import date
-from typing import Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
 from atendente.domain.models import (
+    ContractSLA,
+    ContractTier,
     Customer,
     CustomerSegment,
+    Invoice,
+    InvoiceStatus,
     Order,
     OrderItem,
     OrderStatus,
     RefundRequest,
     RefundStatus,
     Ticket,
-    TicketPriority,
-    TicketStatus,
-    ContractSLA,
-    ContractTier,
-    Invoice,
-    InvoiceStatus
 )
 from atendente.domain.validators import DocumentType
 from atendente.infra.db.models import (
+    ContractSLAORM,
     CustomerORM,
+    InvoiceORM,
     OrderORM,
     RefundRequestORM,
     TicketORM,
-    ContractSLAORM,
-    InvoiceORM
 )
 
 
@@ -37,7 +35,7 @@ class PostgresRepository:
 
 
 class CustomerRepository(PostgresRepository):
-    async def find_by_doc(self, doc_number: str) -> Optional[Customer]:
+    async def find_by_doc(self, doc_number: str) -> Customer | None:
         stmt = select(CustomerORM).where(CustomerORM.doc_number == doc_number)
         result = await self.session.execute(stmt)
         orm = result.scalar_one_or_none()
@@ -51,10 +49,10 @@ class CustomerRepository(PostgresRepository):
             segment=CustomerSegment(orm.segment),
             email=orm.email,
             phone=orm.phone,
-            created_at=orm.created_at
+            created_at=orm.created_at,
         )
 
-    async def find_by_id(self, customer_id: str) -> Optional[Customer]:
+    async def find_by_id(self, customer_id: str) -> Customer | None:
         stmt = select(CustomerORM).where(CustomerORM.id == customer_id)
         result = await self.session.execute(stmt)
         orm = result.scalar_one_or_none()
@@ -68,17 +66,13 @@ class CustomerRepository(PostgresRepository):
             segment=CustomerSegment(orm.segment),
             email=orm.email,
             phone=orm.phone,
-            created_at=orm.created_at
+            created_at=orm.created_at,
         )
 
 
 class OrderRepository(PostgresRepository):
-    async def find_by_id(self, order_id: str) -> Optional[Order]:
-        stmt = (
-            select(OrderORM)
-            .options(selectinload(OrderORM.items))
-            .where(OrderORM.id == order_id)
-        )
+    async def find_by_id(self, order_id: str) -> Order | None:
+        stmt = select(OrderORM).options(selectinload(OrderORM.items)).where(OrderORM.id == order_id)
         result = await self.session.execute(stmt)
         orm = result.scalar_one_or_none()
         if not orm:
@@ -86,10 +80,7 @@ class OrderRepository(PostgresRepository):
 
         items = [
             OrderItem(
-                sku=it.sku,
-                name=it.name,
-                quantity=it.quantity,
-                unit_price_cents=it.unit_price_cents
+                sku=it.sku, name=it.name, quantity=it.quantity, unit_price_cents=it.unit_price_cents
             )
             for it in orm.items
         ]
@@ -102,7 +93,7 @@ class OrderRepository(PostgresRepository):
             status=OrderStatus(orm.status),
             delivery_date=orm.delivery_date,
             tracking_code=orm.tracking_code,
-            created_at=orm.created_at
+            created_at=orm.created_at,
         )
 
 
@@ -116,13 +107,13 @@ class RefundRepository(PostgresRepository):
             amount_cents=refund.amount_cents,
             status=refund.status.value,
             eligible=refund.eligible,
-            created_at=refund.created_at
+            created_at=refund.created_at,
         )
         self.session.add(orm)
         await self.session.flush()
         return refund
 
-    async def find_by_id(self, refund_id: str) -> Optional[RefundRequest]:
+    async def find_by_id(self, refund_id: str) -> RefundRequest | None:
         stmt = select(RefundRequestORM).where(RefundRequestORM.id == refund_id)
         result = await self.session.execute(stmt)
         orm = result.scalar_one_or_none()
@@ -136,7 +127,7 @@ class RefundRepository(PostgresRepository):
             amount_cents=orm.amount_cents,
             status=RefundStatus(orm.status),
             eligible=orm.eligible,
-            created_at=orm.created_at
+            created_at=orm.created_at,
         )
 
 
@@ -150,7 +141,7 @@ class TicketRepository(PostgresRepository):
             priority=ticket.priority.value,
             sla_hours=ticket.sla_hours,
             status=ticket.status.value,
-            created_at=ticket.created_at
+            created_at=ticket.created_at,
         )
         self.session.add(orm)
         await self.session.flush()
@@ -158,7 +149,7 @@ class TicketRepository(PostgresRepository):
 
 
 class ContractRepository(PostgresRepository):
-    async def find_by_customer_id(self, customer_id: str) -> Optional[ContractSLA]:
+    async def find_by_customer_id(self, customer_id: str) -> ContractSLA | None:
         stmt = select(ContractSLAORM).where(ContractSLAORM.customer_id == customer_id)
         result = await self.session.execute(stmt)
         orm = result.scalar_one_or_none()
@@ -172,15 +163,13 @@ class ContractRepository(PostgresRepository):
             resolution_sla_hours=orm.resolution_sla_hours,
             account_manager=orm.account_manager,
             active=orm.active,
-            created_at=orm.created_at
+            created_at=orm.created_at,
         )
 
 
 class InvoiceRepository(PostgresRepository):
     async def list_by_customer(
-        self,
-        customer_id: str,
-        period: Optional[str] = None
+        self, customer_id: str, period: str | None = None
     ) -> Sequence[Invoice]:
         stmt = select(InvoiceORM).where(InvoiceORM.customer_id == customer_id)
         if period:
@@ -197,7 +186,7 @@ class InvoiceRepository(PostgresRepository):
                 barcode=orm.barcode,
                 due_date=orm.due_date,
                 pdf_url=orm.pdf_url,
-                created_at=orm.created_at
+                created_at=orm.created_at,
             )
             for orm in orms
         ]

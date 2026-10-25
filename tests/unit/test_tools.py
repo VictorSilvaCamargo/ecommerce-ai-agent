@@ -1,5 +1,7 @@
 from collections.abc import AsyncGenerator
+
 import pytest
+
 from atendente.infra.audit import InMemoryAuditRepository
 from atendente.infra.db.database import DatabaseManager
 from atendente.infra.db.models import Base
@@ -9,7 +11,7 @@ from atendente.infra.db.repositories import (
     InvoiceRepository,
     OrderRepository,
     RefundRepository,
-    TicketRepository
+    TicketRepository,
 )
 from atendente.infra.db.seed import seed_data
 from atendente.tools.service import (
@@ -21,7 +23,7 @@ from atendente.tools.service import (
     IdentificarClienteInput,
     NovaLojaToolsService,
     SolicitarReembolsoInput,
-    TransferirParaHumanoInput
+    TransferirParaHumanoInput,
 )
 
 
@@ -41,7 +43,7 @@ async def tools_service() -> AsyncGenerator[NovaLojaToolsService, None]:
             ticket_repo=TicketRepository(session),
             contract_repo=ContractRepository(session),
             invoice_repo=InvoiceRepository(session),
-            audit_repo=audit_repo
+            audit_repo=audit_repo,
         )
 
     await db.engine.dispose()
@@ -90,14 +92,16 @@ async def test_consultar_pedido_unauthorized(tools_service: NovaLojaToolsService
 
 
 @pytest.mark.unit
-async def test_solicitar_reembolso_sensitive_action_requires_confirmation(tools_service: NovaLojaToolsService) -> None:
+async def test_solicitar_reembolso_sensitive_action_requires_confirmation(
+    tools_service: NovaLojaToolsService,
+) -> None:
     # Passo 1: Solicitação SEM confirmação -> Deve retornar erro CONFIRMATION_REQUIRED com detalhes
     res = await tools_service.solicitar_reembolso(
         SolicitarReembolsoInput(
             order_id="ord_b2c_recent",
             customer_id="cust_b2c_maria",
             motivo="Produto veio com defeito",
-            confirmado=False
+            confirmado=False,
         )
     )
     assert res.success is False
@@ -108,14 +112,16 @@ async def test_solicitar_reembolso_sensitive_action_requires_confirmation(tools_
 
 
 @pytest.mark.unit
-async def test_solicitar_reembolso_sensitive_action_approved_when_confirmed(tools_service: NovaLojaToolsService) -> None:
+async def test_solicitar_reembolso_sensitive_action_approved_when_confirmed(
+    tools_service: NovaLojaToolsService,
+) -> None:
     # Passo 2: Solicitação COM confirmação -> Deve aprovar e persistir o reembolso
     res = await tools_service.solicitar_reembolso(
         SolicitarReembolsoInput(
             order_id="ord_b2c_recent",
             customer_id="cust_b2c_maria",
             motivo="Produto veio com defeito",
-            confirmado=True
+            confirmado=True,
         )
     )
     assert res.success is True
@@ -132,7 +138,7 @@ async def test_solicitar_reembolso_ineligible_order(tools_service: NovaLojaTools
             order_id="ord_b2c_old",
             customer_id="cust_b2c_maria",
             motivo="Arrependimento",
-            confirmado=True
+            confirmado=True,
         )
     )
     assert res.success is False
@@ -141,13 +147,15 @@ async def test_solicitar_reembolso_ineligible_order(tools_service: NovaLojaTools
 
 
 @pytest.mark.unit
-async def test_abrir_chamado_b2b_calculates_platinum_sla(tools_service: NovaLojaToolsService) -> None:
+async def test_abrir_chamado_b2b_calculates_platinum_sla(
+    tools_service: NovaLojaToolsService,
+) -> None:
     res = await tools_service.abrir_chamado(
         AbrirChamadoInput(
             customer_id="cust_b2b_xpto",
             titulo="Instabilidade na integração",
             descricao="Webhooks não estão respondendo",
-            prioridade="CRITICAL"
+            prioridade="CRITICAL",
         )
     )
     assert res.success is True
@@ -157,13 +165,15 @@ async def test_abrir_chamado_b2b_calculates_platinum_sla(tools_service: NovaLoja
 
 
 @pytest.mark.unit
-async def test_abrir_chamado_b2c_calculates_default_sla(tools_service: NovaLojaToolsService) -> None:
+async def test_abrir_chamado_b2c_calculates_default_sla(
+    tools_service: NovaLojaToolsService,
+) -> None:
     res = await tools_service.abrir_chamado(
         AbrirChamadoInput(
             customer_id="cust_b2c_maria",
             titulo="Dúvida sobre entrega",
             descricao="Gostaria de saber o prazo exato",
-            prioridade="MEDIUM"
+            prioridade="MEDIUM",
         )
     )
     assert res.success is True
@@ -195,9 +205,7 @@ async def test_consultar_contrato_sla_rejected_for_b2c(tools_service: NovaLojaTo
 
 @pytest.mark.unit
 async def test_consultar_fatura(tools_service: NovaLojaToolsService) -> None:
-    res = await tools_service.consultar_fatura(
-        ConsultarFaturaInput(customer_id="cust_b2b_xpto")
-    )
+    res = await tools_service.consultar_fatura(ConsultarFaturaInput(customer_id="cust_b2b_xpto"))
     assert res.success is True
     assert res.data is not None
     assert len(res.data) == 2
@@ -220,7 +228,7 @@ async def test_transferir_para_humano(tools_service: NovaLojaToolsService) -> No
         TransferirParaHumanoInput(
             customer_id="cust_b2c_maria",
             motivo="Cliente insatisfeito com resposta automática",
-            resumo_conversa="Cliente perguntou sobre reembolso e pediu atendente humano."
+            resumo_conversa="Cliente perguntou sobre reembolso e pediu atendente humano.",
         )
     )
     assert res.success is True

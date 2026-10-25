@@ -1,0 +1,32 @@
+[importlinter]
+root_package = atendente
+
+[importlinter:contract:domain-isolation]
+name = Domain layer must not import from any outer layers
+type = forbidden
+source_modules =
+    atendente.domain
+forbidden_modules =
+    atendente.api
+    atendente.infra
+    atendente.agent
+    atendente.tools
+    atendente.rag
+
+[importlinter:contract:tools-isolation]
+name = Tools layer must not import from api or agent
+type = forbidden
+source_modules =
+    atendente.tools
+forbidden_modules =
+    atendente.api
+    atendente.agent
+
+[importlinter:contract:rag-isolation]
+name = RAG layer must not import from api or agent
+type = forbidden
+source_modules =
+    atendente.rag
+forbidden_modules =
+    atendente.api
+    atendente.agent

@@ -1,13 +1,14 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from atendente.domain.models import CustomerSegment, OrderStatus
 from atendente.infra.db.database import DatabaseManager
 from atendente.infra.db.models import Base
 from atendente.infra.db.repositories import (
-    CustomerRepository,
-    OrderRepository,
     ContractRepository,
-    InvoiceRepository
+    CustomerRepository,
+    InvoiceRepository,
+    OrderRepository,
 )
 from atendente.infra.db.seed import seed_data
 

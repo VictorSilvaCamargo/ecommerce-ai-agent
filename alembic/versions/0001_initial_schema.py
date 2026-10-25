@@ -5,14 +5,17 @@ Revises:
 Create Date: 2026-10-25 15:40:00.000000
 
 """
-from typing import Sequence, Union
-from alembic import op
+
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 
+from alembic import op
+
 revision: str = "0001_initial_schema"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -75,8 +78,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["order_id"], ["orders.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_refund_requests_customer_id"), "refund_requests", ["customer_id"], unique=False)
-    op.create_index(op.f("ix_refund_requests_order_id"), "refund_requests", ["order_id"], unique=False)
+    op.create_index(
+        op.f("ix_refund_requests_customer_id"), "refund_requests", ["customer_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_refund_requests_order_id"), "refund_requests", ["order_id"], unique=False
+    )
 
     # 5. Tabela de Tickets / Chamados
     op.create_table(

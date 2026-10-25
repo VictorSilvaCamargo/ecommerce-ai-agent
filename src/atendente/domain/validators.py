@@ -1,8 +1,8 @@
 import re
-from enum import Enum
+from enum import StrEnum
 
 
-class DocumentType(str, Enum):
+class DocumentType(StrEnum):
     CPF = "CPF"
     CNPJ = "CNPJ"
 
@@ -36,10 +36,7 @@ def validate_cpf(cpf: str) -> bool:
     sum_2 = sum(int(digits[i]) * (11 - i) for i in range(10))
     rem_2 = 11 - (sum_2 % 11)
     digit_2 = 0 if rem_2 >= 10 else rem_2
-    if int(digits[10]) != digit_2:
-        return False
-
-    return True
+    return int(digits[10]) == digit_2
 
 
 def validate_cnpj(cnpj: str) -> bool:
@@ -68,10 +65,7 @@ def validate_cnpj(cnpj: str) -> bool:
     sum_2 = sum(int(digits[i]) * weights_2[i] for i in range(13))
     rem_2 = sum_2 % 11
     digit_2 = 0 if rem_2 < 2 else 11 - rem_2
-    if int(digits[13]) != digit_2:
-        return False
-
-    return True
+    return int(digits[13]) == digit_2
 
 
 def validate_document(doc: str) -> tuple[DocumentType, str]:

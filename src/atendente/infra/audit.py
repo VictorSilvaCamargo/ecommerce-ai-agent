@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
+
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pydantic import BaseModel, Field
 
@@ -9,12 +10,12 @@ from pydantic import BaseModel, Field
 class ToolAuditEntry(BaseModel):
     id: str = Field(default_factory=lambda: f"aud_{uuid4().hex[:12]}")
     tool_name: str
-    customer_id: Optional[str] = None
+    customer_id: str | None = None
     input_payload: dict[str, Any]
-    output_payload: Optional[Any] = None
-    error: Optional[dict[str, Any]] = None
+    output_payload: Any | None = None
+    error: dict[str, Any] | None = None
     latency_ms: float = 0.0
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class AuditRepository(ABC):
