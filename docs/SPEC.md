@@ -171,4 +171,34 @@ class ToolResult(BaseModel, Generic[T]):
 - **Abstenção por Relevância:** Se o score do melhor chunk for inferior ao limiar mínimo ($\theta_{\text{min}}$), o retriever retorna vazio, acionando a abstenção estruturada.
 - **Rastreabilidade:** Cada chunk recuperado expõe `source_file`, `section`, `title` e `breadcrumbs` para citação na resposta do agente.
 
+---
+
+## 9. Detalhamento da Fase 3: Grafo de Conversação com LangGraph
+
+- **Estado Tipado (`ConversationState`):** Esquema Pydantic v2 com `customer_id`, `customer_document`, `customer_segment` (`B2C`, `B2B`, `INDEFINIDO`), `authenticated`, `channel`, `messages`, `active_intent`, `pending_action`, `action_confirmed`, `retrieved_docs`, `handoff_requested`, `handoff_reason`, `consecutive_unresolved_turns`, `frustration_detected` e `summary`.
+- **Nós Funcionais:** `summarize_history`, `identify`, `classify_intent`, `retrieve_context`, `decide_tool`, `confirm_action`, `respond`, `evaluate_handoff`.
+- **Gatekeeper de Ação Sensível:** `solicitar_reembolso` e chamados `P1` são interceptados em `confirm_action` quando `action_confirmed=False`, exigindo resposta explícita de confirmação no turno seguinte.
+
+---
+
+## 10. Detalhamento da Fase 3b: Engenharia de Prompts e Janela de Contexto
+
+### 10.1 Catálogo Versionado de Prompts (`src/atendente/agent/prompts/`)
+- Arquivos separados por responsabilidade:
+  - `system.py`: Prompts de sistema (v1 ingênuo, v2 estruturado com regras, v3 otimizado com few-shot, delimitação XML e checklist de autoverificação).
+  - `classifier.py`: Prompts de classificação de intenção com exemplos few-shot por categoria e schema Pydantic de saída estruturada.
+  - `rag_delimiters.py`: Empacotamento seguro de chunks recuperados com tags `<contexto_seguro>...</contexto_seguro>` e sanitização ativa contra *indirect prompt injection*.
+  - `budget.py`: Gerenciador de orçamento de tokens por seção (`system`, `history`, `rag`, `tools`) com truncamento inteligente e garantia determinística de que o limite total nunca estoura.
+  - `CHANGELOG.md`: Registro evolutivo das versões de prompts (`v1.0.0`, `v2.0.0`, `v3.0.0`) e seus respectivos hashes SHA-256 para rastreabilidade no Langfuse.
+
+### 10.2 Orçamento Estrito de Tokens (`ContextBudgetManager`)
+| Seção | Limite Padrão (Tokens) | Política de Excesso |
+|---|---|---|
+| `system` | 600 | Validado estaticamente (falha se o template exceder) |
+| `tools` | 600 | Seleção apenas das Tools pertinentes ao segmento ativo |
+| `rag` | 800 | Truncamento dos chunks de menor score mantendo cabeçalho e fonte |
+| `history` | 1000 | Compactação via sumário + preservação das últimas mensagens |
+| **Total Máximo** | **3000** | Invariante garantida por testes automatizados |
+
+
 
