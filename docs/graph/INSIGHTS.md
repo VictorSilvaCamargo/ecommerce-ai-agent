@@ -49,3 +49,11 @@ Registro evolutivo das métricas topológicas, nós centrais, acoplamentos e nó
 - **Acoplamentos e Conexões:** A camada `api/` consome unidirecionalmente `workers/security.py`, `workers/idempotency.py` e `workers/tasks.py`. Os 3 contratos do `import-linter` permanecem 100% preservados.
 - **Módulos Órfãos / Fracos:** O nó `workers/__init__.py` dejó de ser órfão; apenas `mcp_server/` aguarda implementação na Fase 6.
 - **Ajustes e Correções:** Aplicada modelagem de ameaças STRIDE (`security-and-hardening`) na fronteira `/webhook/messages`: verificação HMAC-SHA256 em tempo constante (`hmac.compare_digest`), janela anti-replay de 300s no header `X-Webhook-Timestamp`, desduplicação `SETNX` e roteamento automático para `dlq_unhandled_messages` após 3 falhas com backoff exponencial.
+
+---
+
+### Fase 5: Observabilidade, Evals e Ciclo de Debug
+- **Nós Centrais:** `ObservabilityManager` (`observability.py`), `TraceRecord`, `RetrievalMonitor` (`monitor.py`), `LLMJudge` (`rubrics.py`) e `run_full_eval_suite` (`run_evals.py`) consolidaram o subsistema de observabilidade e avaliação contínua, expandindo o grafo para 870 nós, 2077 arestas e 49 comunidades.
+- **Acoplamentos e Conexões:** `api/main.py` integra o middleware HTTP RED e os endpoints `/metrics` e `/feedback` consumindo `infra/observability.py`, enquanto `rag/monitor.py` permanece desacoplado de `api` e `agent` (3/3 contratos do `import-linter` preservados).
+- **Módulos Órfãos / Fracos:** Apenas `src/atendente/mcp_server/__init__.py` permanece aguardando a Fase 6 (servidor MCP e guardrails finais).
+- **Ajustes e Correções:** Implementado mascaramento recursivo de PII (`mask_pii_text` e `mask_pii_dict` no `structlog`), conversor `make trace-to-test`, dataset de 85 casos rotulados (`novaloja_eval_dataset.json`) com 100% de aprovação nos gates determinísticos e de LLM-as-a-Judge calibrado, e documentação de 3 bugs reais em `docs/DEBUG_PLAYBOOK.md`.

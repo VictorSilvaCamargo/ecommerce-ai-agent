@@ -1,0 +1,71 @@
+{
+  "uid": "atendente-ia-overview",
+  "title": "Atendente IA — NovaLoja Overview (RED & Business Metrics)",
+  "tags": ["atendente-ia", "novaloja", "langgraph", "rag"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP Requests Total (Rate)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "sum by (path, status) (rate(atendente_http_requests_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "HTTP Error Rate (>=400)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "sum by (path) (rate(atendente_http_errors_total[5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Execuções de Tools por Nome e Status",
+      "type": "barchart",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {
+          "expr": "sum by (tool_name, status) (atendente_tool_calls_total)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Consumo de Tokens (Prompt vs Completion)",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+      "targets": [
+        {
+          "expr": "sum by (type) (atendente_tokens_total)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Feedback de Usuários (Thumbs Up vs Down)",
+      "type": "piechart",
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
+      "targets": [
+        {
+          "expr": "sum by (polarity) (atendente_user_feedback_total)",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

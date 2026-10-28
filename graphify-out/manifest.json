@@ -24,16 +24,16 @@
     "semantic_hash": "1e4dc183efbc33e5605588f7dee3ba05"
   },
   "docker-compose.yml": {
-    "mtime": 1792953592.6666873,
-    "seen": 1792955324.2503319,
-    "ast_hash": "090ef2d3c4ff40a90bd15b113c0daa65",
-    "semantic_hash": "090ef2d3c4ff40a90bd15b113c0daa65"
+    "mtime": 1792959190.0923839,
+    "seen": 1792959646.1859999,
+    "ast_hash": "31e5d3afc1695432116c2ab9f4e6af7f",
+    "semantic_hash": "31e5d3afc1695432116c2ab9f4e6af7f"
   },
   "pyproject.toml": {
-    "mtime": 1792954269.6845267,
-    "seen": 1792955324.2503319,
-    "ast_hash": "1d9c9fd7885827ddeead12e930b222bc",
-    "semantic_hash": "1d9c9fd7885827ddeead12e930b222bc"
+    "mtime": 1792959438.0322871,
+    "seen": 1792959646.1870053,
+    "ast_hash": "704232760a730f1b0d9342eda8b36a1f",
+    "semantic_hash": "704232760a730f1b0d9342eda8b36a1f"
   },
   "src/atendente/__init__.py": {
     "mtime": 1792953635.475686,
@@ -54,10 +54,10 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "src/atendente/api/main.py": {
-    "mtime": 1792958078.5385623,
-    "seen": 1792958255.1027513,
-    "ast_hash": "880437b83c8a450a04b61f27796da04e",
-    "semantic_hash": "880437b83c8a450a04b61f27796da04e"
+    "mtime": 1792959145.1059113,
+    "seen": 1792959646.190082,
+    "ast_hash": "7bfd0a7868e5a495543d2c56d5d13dc7",
+    "semantic_hash": "7bfd0a7868e5a495543d2c56d5d13dc7"
   },
   "src/atendente/domain/__init__.py": {
     "mtime": 1792953642.6563454,
@@ -406,5 +406,103 @@
     "seen": 1792958255.1066504,
     "ast_hash": "0b90aaa508bfa5121fc073c046240716",
     "semantic_hash": "0b90aaa508bfa5121fc073c046240716"
+  },
+  "evals/__init__.py": {
+    "mtime": 1792959314.7052116,
+    "seen": 1792959646.1859999,
+    "ast_hash": "6d5cf29249a0d84542d16b6c4c83efe6",
+    "semantic_hash": "6d5cf29249a0d84542d16b6c4c83efe6"
+  },
+  "evals/datasets/novaloja_eval_dataset.json": {
+    "mtime": 1792959448.1988313,
+    "seen": 1792959646.1859999,
+    "ast_hash": "8cbbcbd1d71c605c75b082363c277aa0",
+    "semantic_hash": "8cbbcbd1d71c605c75b082363c277aa0",
+    "ast_empty": true
+  },
+  "evals/judges/__init__.py": {
+    "mtime": 1792959316.047361,
+    "seen": 1792959646.1859999,
+    "ast_hash": "2329b63f4cd01ad103f85499a5b0a7a1",
+    "semantic_hash": "2329b63f4cd01ad103f85499a5b0a7a1"
+  },
+  "evals/judges/rubrics.py": {
+    "mtime": 1792959574.3193264,
+    "seen": 1792959646.1859999,
+    "ast_hash": "00a1cd12d0c57c7c5748f0f4e6da577f",
+    "semantic_hash": "00a1cd12d0c57c7c5748f0f4e6da577f"
+  },
+  "evals/runners/__init__.py": {
+    "mtime": 1792959317.2879353,
+    "seen": 1792959646.1870053,
+    "ast_hash": "a707e17a653faa7fba7f6d6e919483d7",
+    "semantic_hash": "a707e17a653faa7fba7f6d6e919483d7"
+  },
+  "evals/runners/run_evals.py": {
+    "mtime": 1792959574.3203418,
+    "seen": 1792959646.1870053,
+    "ast_hash": "24afc983e4a02a8c975a3704c55b5228",
+    "semantic_hash": "24afc983e4a02a8c975a3704c55b5228"
+  },
+  "infra/grafana/dashboards/atendente_ia_overview.json": {
+    "mtime": 1792959210.5250807,
+    "seen": 1792959646.1870053,
+    "ast_hash": "32304115fef501a73a0eceb19ad667d4",
+    "semantic_hash": "32304115fef501a73a0eceb19ad667d4",
+    "ast_empty": true
+  },
+  "infra/grafana/provisioning/dashboards/dashboard.yml": {
+    "mtime": 1792959209.0659933,
+    "seen": 1792959646.1870053,
+    "ast_hash": "178253548734d65d650f4775a16af94e",
+    "semantic_hash": "178253548734d65d650f4775a16af94e"
+  },
+  "infra/grafana/provisioning/datasources/datasource.yml": {
+    "mtime": 1792959206.7873178,
+    "seen": 1792959646.1870053,
+    "ast_hash": "f86700bb8a24faceb366a05da70d445a",
+    "semantic_hash": "f86700bb8a24faceb366a05da70d445a"
+  },
+  "infra/prometheus/prometheus.yml": {
+    "mtime": 1792959205.0390038,
+    "seen": 1792959646.1870053,
+    "ast_hash": "ba996df5fd665cd1375a8d12ffaaf9f4",
+    "semantic_hash": "ba996df5fd665cd1375a8d12ffaaf9f4"
+  },
+  "src/atendente/infra/observability.py": {
+    "mtime": 1792959537.0434763,
+    "seen": 1792959646.193082,
+    "ast_hash": "0e25b8ab00aff357f08a2100ad24737a",
+    "semantic_hash": "0e25b8ab00aff357f08a2100ad24737a"
+  },
+  "src/atendente/infra/trace_to_test.py": {
+    "mtime": 1792959259.8367808,
+    "seen": 1792959646.193082,
+    "ast_hash": "de236c7f86e1fcd9d2f266e22d9bfd32",
+    "semantic_hash": "de236c7f86e1fcd9d2f266e22d9bfd32"
+  },
+  "src/atendente/rag/monitor.py": {
+    "mtime": 1792959574.2399318,
+    "seen": 1792959646.1945841,
+    "ast_hash": "7e6f7011550d783ff35e979910a40d9a",
+    "semantic_hash": "7e6f7011550d783ff35e979910a40d9a"
+  },
+  "tests/integration/test_evals_suite.py": {
+    "mtime": 1792959574.2399318,
+    "seen": 1792959646.1965873,
+    "ast_hash": "734cc2fa52e399b8069d8aab5a54c748",
+    "semantic_hash": "734cc2fa52e399b8069d8aab5a54c748"
+  },
+  "tests/unit/test_observability.py": {
+    "mtime": 1792959574.3193264,
+    "seen": 1792959646.1996913,
+    "ast_hash": "d698adfad5aadb00122697c5109f54c4",
+    "semantic_hash": "d698adfad5aadb00122697c5109f54c4"
+  },
+  "tests/unit/test_retrieval_monitor_and_trace_to_test.py": {
+    "mtime": 1792959231.318427,
+    "seen": 1792959646.2002215,
+    "ast_hash": "52771a02c2e02cabc6cedf264bcbdf7c",
+    "semantic_hash": "52771a02c2e02cabc6cedf264bcbdf7c"
   }
 }
