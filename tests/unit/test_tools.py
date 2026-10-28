@@ -223,6 +223,53 @@ async def test_buscar_base_conhecimento(tools_service: NovaLojaToolsService) -> 
 
 
 @pytest.mark.unit
+async def test_buscar_base_conhecimento_with_retriever_and_abstention(
+    tools_service: NovaLojaToolsService,
+) -> None:
+    from pathlib import Path
+
+    from atendente.rag.chunker import ChunkingConfig, chunk_directory
+    from atendente.rag.embeddings import DeterministicEmbeddingService
+    from atendente.rag.retriever import HybridRetriever
+    from atendente.rag.store import InMemoryVectorStore
+
+    chunks = chunk_directory(Path("data/kb"), ChunkingConfig(target_tokens=512, overlap_tokens=64))
+    emb_service = DeterministicEmbeddingService(dimension=384)
+    chunks_with_emb = [
+        chk.model_copy(update={"embedding": emb_service.embed_text(chk.content)}) for chk in chunks
+    ]
+    store = InMemoryVectorStore()
+    await store.add_chunks(chunks_with_emb)
+
+    retriever = HybridRetriever(
+        vector_store=store, embedding_service=emb_service, relevance_threshold=0.012
+    )
+    tools_service.retriever = retriever
+
+    # 1. Consulta com sucesso
+    res = await tools_service.buscar_base_conhecimento(
+        BuscarBaseConhecimentoInput(
+            query="quais são os níveis de SLA do contrato B2B?", segmento="B2B"
+        )
+    )
+    assert res.success is True
+    assert res.data is not None
+    assert len(res.data) >= 1
+    assert any("SLA" in x["title"] for x in res.data)
+
+    # 2. Consulta desconexa (abstenção)
+    res_abstain = await tools_service.buscar_base_conhecimento(
+        BuscarBaseConhecimentoInput(
+            query="qual é a receita de bolo de fubá com goiabada?", segmento="B2B"
+        )
+    )
+    assert res_abstain.success is False
+    assert res_abstain.error is not None
+    assert res_abstain.error.code == "NO_RELEVANT_KNOWLEDGE"
+    assert res_abstain.error.details["abstained"] is True
+
+
+@pytest.mark.unit
 async def test_transferir_para_humano(tools_service: NovaLojaToolsService) -> None:
     res = await tools_service.transferir_para_humano(
         TransferirParaHumanoInput(

@@ -147,3 +147,28 @@ class ToolResult(BaseModel, Generic[T]):
 - Contrato 2: `tools` depende de `domain` e `infra` (repositórios de auditoria), mas não importa `api` nem `agent`.
 - Contrato 3: `rag` não importa `api` nem `agent`.
 
+---
+
+## 8. Detalhamento da Fase 2: Pipeline de RAG
+
+### 8.1 Corpus de Conhecimento NovaLoja (`data/kb/`)
+- Mínimo de 30 documentos estruturados em Markdown:
+  - `data/kb/b2c/` (12 docs: políticas de devolução e arrependimento, trocas, cancelamentos, prazos e rastreio, garantia legal, estorno).
+  - `data/kb/b2b/` (12 docs: SLAs contratuais Platinum/Gold/Enterprise, faturamento e NF consolidada, limites de crédito PJ, suporte 24x7, multas por quebra de SLA).
+  - `data/kb/geral/` (6 docs: termos de uso, canais de ouvidoria, segurança da informação, LGPD e regras institucionais).
+
+### 8.2 Estratégia de Chunking e Comparação (ADR-0004)
+- Particionamento semântico orientado por seções Markdown com cabeçalho completo como breadcrumbs.
+- Avaliação de 3 configurações de granularidade:
+  - **Config A:** 256 tokens / overlap 30
+  - **Config B (Produção):** 512 tokens / overlap 64
+  - **Config C:** 1024 tokens / overlap 128
+- Métricas obrigatórias avaliadas: **Hit Rate@k** (k=3, k=5) e **Mean Reciprocal Rank (MRR)** sobre dataset de perguntas de teste.
+
+### 8.3 Motor de Busca Híbrida e Anti-Alucinação
+- **Combinação Vetorial + BM25:** pgvector (`Vector`) com similaridade de cosseno combinada com busca lexical Full-Text Search via Reciprocal Rank Fusion (RRF).
+- **Segregação por Segmento:** Filtro obrigatório de metadados (`segment IN ('B2C', 'GERAL')` ou `'B2B', 'GERAL'`).
+- **Abstenção por Relevância:** Se o score do melhor chunk for inferior ao limiar mínimo ($\theta_{\text{min}}$), o retriever retorna vazio, acionando a abstenção estruturada.
+- **Rastreabilidade:** Cada chunk recuperado expõe `source_file`, `section`, `title` e `breadcrumbs` para citação na resposta do agente.
+
+
