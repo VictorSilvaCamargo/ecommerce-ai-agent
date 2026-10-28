@@ -82,7 +82,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q --strict-markers"
+addopts = "-ra -q --strict-markers --ignore=tests/load/locustfile.py"
 pythonpath = [".", "src"]
 testpaths = ["tests"]
 asyncio_mode = "auto"

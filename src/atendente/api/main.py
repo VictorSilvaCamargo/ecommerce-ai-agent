@@ -1,7 +1,12 @@
+import asyncio
+import sys
 import time
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Any
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
@@ -60,10 +65,14 @@ observability_manager = ObservabilityManager()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     global audit_repository
+    if "sqlite" in settings.database_url:
+        await db_manager.create_all_tables()
     # Inicialização opcional do MongoDB se configurado e acessível
     try:
         if settings.mongodb_uri and "mongodb" in settings.mongodb_uri:
-            audit_repository = MongoAuditRepository(settings.mongodb_uri, settings.mongodb_database)
+            repo = MongoAuditRepository(settings.mongodb_uri, settings.mongodb_database)
+            await asyncio.wait_for(repo.client.admin.command("ping"), timeout=1.0)
+            audit_repository = repo
     except Exception:
         audit_repository = InMemoryAuditRepository()
     yield

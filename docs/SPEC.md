@@ -234,6 +234,26 @@ class ToolResult(BaseModel, Generic[T]):
 - Juiz (`LLMJudge`) com 4 rubricas versionadas (`faithfulness`, `tone`, `completeness`, `safety`) calibrado sobre amostra rotulada manualmente.
 - Conversor `trace-to-test` (`make trace-to-test TRACE_ID=...`) que transforma qualquer trace anômalo em caso regressivo do dataset.
 
+---
+
+## 13. Detalhamento da Fase 6: Segurança, Servidor MCP Oficial e Entrega Final
+
+### 13.1 Guardrails de Entrada e Saída (`src/atendente/agent/guardrails.py`)
+- **Input Guardrail:** Detecta e bloqueia *direct prompt injection* (ex.: `ignore all previous instructions`, `system override`, `jailbreak`, `DAN`, `print os.environ`), *indirect prompt injection* em documentos ou payloads, e excesso de tamanho/escopo de ações por thread.
+- **Output Guardrail:** Sanitiza vazamento de credenciais (`api_key`, `bearer`, `postgres://`, `mongodb://`) e PII de terceiros na resposta gerada antes de entregá-la ao cliente.
+
+### 13.2 Servidor MCP Oficial (`src/atendente/mcp_server/server.py`)
+- Implementado utilizando o SDK oficial `mcp` (`mcp.server.fastmcp.FastMCP`), expondo as **8 Tools de atendimento da NovaLoja** (`identificar_cliente`, `consultar_pedido`, `solicitar_reembolso`, `abrir_chamado`, `consultar_contrato_sla`, `consultar_fatura`, `buscar_base_conhecimento`, `transferir_para_humano`) com tipagem Pydantic, descrições canônicas e integração direta com `NovaLojaToolsService`.
+
+### 13.3 Teste de Carga Locust e Meta de Latência (`tests/load/locustfile.py`)
+- Script Locust simulando tráfego concorrente B2C e B2B nas rotas de Tools, Webhooks e Observabilidade.
+- Teste automatizado de benchmark (`tests/integration/test_api_latency_benchmark.py`) comprovando empiricamente **latência p95 < 300 ms** na API (excluindo tempo de inferência de LLM externo).
+
+### 13.4 Simplificação, Auditoria e Parecer de Lançamento (`docs/SHIP_REPORT.md` & `README.md`)
+- Execução de `/code-simplify`, `/review` e `/ship` (consolidando `code-reviewer`, `security-auditor` e `test-engineer`).
+- Emissão do parecer formal Go/No-Go em `docs/SHIP_REPORT.md` e documentação completa de arquitetura, quickstart de 5 minutos, roteiro de demonstração e trade-offs em `README.md`.
+
+
 
 
 

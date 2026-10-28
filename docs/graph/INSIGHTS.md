@@ -57,3 +57,11 @@ Registro evolutivo das métricas topológicas, nós centrais, acoplamentos e nó
 - **Acoplamentos e Conexões:** `api/main.py` integra o middleware HTTP RED e os endpoints `/metrics` e `/feedback` consumindo `infra/observability.py`, enquanto `rag/monitor.py` permanece desacoplado de `api` e `agent` (3/3 contratos do `import-linter` preservados).
 - **Módulos Órfãos / Fracos:** Apenas `src/atendente/mcp_server/__init__.py` permanece aguardando a Fase 6 (servidor MCP e guardrails finais).
 - **Ajustes e Correções:** Implementado mascaramento recursivo de PII (`mask_pii_text` e `mask_pii_dict` no `structlog`), conversor `make trace-to-test`, dataset de 85 casos rotulados (`novaloja_eval_dataset.json`) com 100% de aprovação nos gates determinísticos e de LLM-as-a-Judge calibrado, e documentação de 3 bugs reais em `docs/DEBUG_PLAYBOOK.md`.
+
+---
+
+### Fase 6: Segurança, Servidor MCP Oficial e Entrega Final
+- **Nós Centrais:** `create_novaloja_mcp_server` (`mcp_server/server.py`) e `SecurityGuardrails` (`agent/guardrails.py`) integraram a última fronteira externa ao `NovaLojaToolsService`, levando o grafo final para **923 nós, 2231 arestas e 51 comunidades**.
+- **Acoplamentos e Conexões:** O comando `graphify path "domain/models.py" "infra/db/models.py"` confirmou `No directed path found`, provando em conjunto com o `import-linter` (3/3 contratos `KEPT`) que a Arquitetura Hexagonal permaneceu íntegra do início ao fim do projeto.
+- **Módulos Órfãos / Fracos:** **Zero módulos órfãos** — todos os subpacotes planejados (`domain`, `tools`, `rag`, `agent`, `workers`, `infra`, `api`, `mcp_server`, `evals`) estão 100% implementados, integrados e cobertos por testes.
+- **Ajustes e Correções:** Ciclo `/code-simplify` extraiu `_dump_tool_result` no servidor MCP (`100%` de cobertura em `server.py`), guardrails anti-injection e anti-leakage validados pela suíte de segurança (`tests/security/test_security_guardrails.py`), benchmark comprovou `p95 < 50ms` (meta `< 300ms`) e parecer final Go/No-Go registrado em `docs/SHIP_REPORT.md`.

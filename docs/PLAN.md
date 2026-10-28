@@ -133,14 +133,14 @@ flowchart LR
 
 ---
 
-### Fase 6: Segurança, MCP e Entrega Final (Próxima Fase)
+### Fase 6: Segurança, MCP e Entrega Final (Concluída)
 - **Objetivo:** Implementar servidor MCP oficial em Python expondo as Tools de atendimento, auditar segurança completa, rodar testes de carga Locust, executar `/code-simplify`, `/review` e `/ship`, gerando documentação final e relatório de entrega.
 - **Tarefas:**
-  1. Desenvolver servidor MCP em `src/atendente/mcp_server/` expondo as ferramentas para clientes externos.
-  2. Implementar guardrails adicionais de sanitização de PII e bloqueio de prompt injection direto e indireto.
-  3. Executar teste de carga com Locust comprovando p95 da API < 300 ms (excluindo tempo do LLM).
-  4. Executar `/code-simplify` para limpeza de complexidade desnecessária.
-  5. Executar `/review` completo de código e qualidade.
-  6. Executar `/ship` (code-reviewer + security-auditor + test-engineer) gerando o parecer go/no-go em `docs/SHIP_REPORT.md`.
-  7. Confeccionar `README.md` completo com guia rápido de 5 minutos, arquitetura, decisões técnicas e lista de melhorias futuras.
-- **Critério de Saída:** Todas as verificações do Definition of Done (DoD) atendidas, CI verde e relatório `docs/SHIP_REPORT.md` aprovado.
+  1. `[x]` Desenvolver servidor MCP em `src/atendente/mcp_server/server.py` (`MCPServer` do SDK oficial `mcp`) expondo as 8 ferramentas para clientes externos.
+  2. `[x]` Implementar guardrails adicionais de sanitização de PII/credenciais e bloqueio de prompt injection direto e indireto em `src/atendente/agent/guardrails.py`.
+  3. `[x]` Executar teste de carga com Locust (`tests/load/locustfile.py`) e benchmark (`tests/integration/test_api_latency_benchmark.py`) comprovando p95 da API < 300 ms (excluindo tempo do LLM).
+  4. `[x]` Executar `/code-simplify` para limpeza de complexidade desnecessária.
+  5. `[x]` Executar `/review` completo de código e qualidade.
+  6. `[x]` Executar `/ship` (code-reviewer + security-auditor + test-engineer) gerando o parecer Go/No-Go em `docs/SHIP_REPORT.md`.
+  7. `[x]` Confeccionar `README.md` completo com guia rápido de 5 minutos, arquitetura, decisões técnicas e lista de melhorias futuras.
+- **Critério de Saída:** Todas as verificações do Definition of Done (DoD) atendidas, 101 testes aprovados (88% de cobertura), CI verde e relatório `docs/SHIP_REPORT.md` aprovado.
