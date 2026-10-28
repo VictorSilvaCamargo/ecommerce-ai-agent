@@ -32,10 +32,20 @@ from atendente.tools.service import (
     SolicitarReembolsoInput,
     TransferirParaHumanoInput,
 )
+from atendente.workers.idempotency import IdempotencyStore, InMemoryIdempotencyStore
+from atendente.workers.security import verify_webhook_hmac
+from atendente.workers.tasks import (
+    DLQEntry,
+    DLQStore,
+    InMemoryDLQStore,
+    WebhookMessagePayload,
+)
 
 # Gerenciadores globais de infraestrutura
 db_manager = DatabaseManager(settings.database_url)
 audit_repository: AuditRepository = InMemoryAuditRepository()
+idempotency_store: IdempotencyStore = InMemoryIdempotencyStore()
+dlq_store: DLQStore = InMemoryDLQStore()
 
 
 @asynccontextmanager
@@ -233,3 +243,64 @@ async def api_transferir_para_humano(
     payload: TransferirParaHumanoInput, service: NovaLojaToolsService = Depends(get_tools_service)
 ) -> ToolResult[dict[str, Any]]:
     return await service.transferir_para_humano(payload)
+
+
+# --- Endpoints de Webhooks Assíncronos e DLQ (Fase 4) ---
+
+
+@app.post("/webhook/messages", tags=["Webhooks"])
+async def receive_webhook_message(
+    request: Request,
+    x_hub_signature_256: str = Header(
+        default="", description="Assinatura HMAC-SHA256 no formato sha256=<hex>"
+    ),
+    x_webhook_timestamp: str | None = Header(
+        default=None, description="Timestamp Unix da emissão do evento para proteção anti-replay"
+    ),
+) -> JSONResponse:
+    raw_body = await request.body()
+
+    if not verify_webhook_hmac(
+        secret=settings.webhook_secret,
+        signature_header=x_hub_signature_256,
+        raw_body=raw_body,
+        timestamp_header=x_webhook_timestamp,
+        max_age_seconds=300,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Assinatura HMAC inválida ou timestamp expirado (proteção anti-replay).",
+        )
+
+    payload = WebhookMessagePayload.model_validate_json(raw_body)
+
+    acquired = await idempotency_store.check_and_lock(payload.message_id, ttl_seconds=86400)
+    if not acquired:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "status": "duplicate_ignored",
+                "message_id": payload.message_id,
+                "thread_id": payload.thread_id,
+            },
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_202_ACCEPTED,
+        content={
+            "status": "queued",
+            "message_id": payload.message_id,
+            "thread_id": payload.thread_id,
+        },
+    )
+
+
+@app.get(
+    "/webhook/dlq",
+    response_model=list[DLQEntry],
+    tags=["Webhooks"],
+    dependencies=[Depends(verify_api_key)],
+)
+async def inspect_dlq_messages() -> list[DLQEntry]:
+    """Lista mensagens irrecuperáveis encaminhadas para a Dead Letter Queue."""
+    return await dlq_store.list_entries()

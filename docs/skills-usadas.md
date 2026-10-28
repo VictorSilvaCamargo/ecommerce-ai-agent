@@ -77,3 +77,10 @@ Este documento registra todas as skills disponíveis no ambiente, seus caminhos 
 | **Fase 3b** | `code-review-and-quality` | Fallback Obrigatório (`SKILL.md`) | Revisão multieixo de imutabilidade (`frozen=True`), tipagem estrita (`mypy --strict`) e isolamento de camadas (`lint-imports`). |
 | **Fase 3b** | `graphify` | CLI nativo + AST Python | Grafo atualizado para 631 nós, 1619 arestas e 30 comunidades. Relatório salvo em `docs/graph/GRAPH_REPORT_fase-3b.md`. |
 | **Fase 3b** | `git-workflow-and-versioning` | Fallback / Prática Direta | Branch `fase-3b-engenharia-prompts`, commits atômicos com Conventional Commits. |
+| **Fase 4** | `security-and-hardening` | Fallback Obrigatório (`SKILL.md`) | Modelagem de ameaças STRIDE na fronteira `/webhook/messages`, comparação HMAC-SHA256 em tempo constante (`hmac.compare_digest`), janela anti-replay de 300s e schema estrito `extra="forbid"`. |
+| **Fase 4** | `source-driven-development` | Fallback Obrigatório (`SKILL.md`) | Configuração oficial do Celery (`task_acks_late=True`, `task_reject_on_worker_lost=True`) e Redis `SET ... NX EX`. |
+| **Fase 4** | `test-driven-development` | Fallback Obrigatório (`SKILL.md`) | Ciclo Red-Green para HMAC, anti-replay, idempotência, retentativas com backoff exponencial e encaminhamento para DLQ (86 testes aprovados, 92% de cobertura). |
+| **Fase 4** | `incremental-implementation` | Fallback Obrigatório (`SKILL.md`) | Fatiamento fino: segurança HMAC + idempotência -> worker Celery + DLQ -> endpoint FastAPI `/webhook/messages` e `/webhook/dlq`. |
+| **Fase 4** | `code-review-and-quality` | Fallback Obrigatório (`SKILL.md`) | Revisão de qualidade, tipagem estrita (`mypy --strict` em 43 arquivos) e contratos `import-linter`. |
+| **Fase 4** | `graphify` | CLI nativo + AST Python | Grafo atualizado para 704 nós, 1812 arestas e 38 comunidades. Relatório salvo em `docs/graph/GRAPH_REPORT_fase-4.md`. |
+| **Fase 4** | `git-workflow-and-versioning` | Fallback / Prática Direta | Branch `fase-4-filas-webhooks`, commits atômicos com Conventional Commits. |

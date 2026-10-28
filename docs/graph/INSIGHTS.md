@@ -41,3 +41,11 @@ Registro evolutivo das métricas topológicas, nós centrais, acoplamentos e nó
 - **Acoplamentos e Conexões:** O subpacote `src/atendente/agent/prompts/` foi integrado de forma unidirecional ao `AgentNodeHandler` e `ConversationState` sem introduzir dependências circulares ou violar os 3 contratos do `import-linter`.
 - **Módulos Órfãos / Fracos:** Apenas `workers/` (Fase 4) e `mcp_server/` (Fase 6) aguardam implementação.
 - **Ajustes e Correções:** Implementada alocação estrita de orçamento de tokens por seção (`system`, `tools`, `rag`, `history`) validada via Hypothesis, sanitização de *indirect prompt injection* com tags XML `<contexto_seguro>` e avaliação comparativa de 3 versões (`v1.0.0`, `v2.0.0`, `v3.0.0`), elevando o score global de 0.00 para 1.00 em `docs/EVALS.md`.
+
+---
+
+### Fase 4: Assincronismo e Webhooks
+- **Nós Centrais:** `MessageWorkerProcessor`, `WebhookMessagePayload`, `IdempotencyStore` e `DLQStore` conectaram a camada `workers/` à API FastAPI (`main.py`), expandindo o grafo para 704 nós, 1812 arestas e 38 comunidades.
+- **Acoplamentos e Conexões:** A camada `api/` consome unidirecionalmente `workers/security.py`, `workers/idempotency.py` e `workers/tasks.py`. Os 3 contratos do `import-linter` permanecem 100% preservados.
+- **Módulos Órfãos / Fracos:** O nó `workers/__init__.py` dejó de ser órfão; apenas `mcp_server/` aguarda implementação na Fase 6.
+- **Ajustes e Correções:** Aplicada modelagem de ameaças STRIDE (`security-and-hardening`) na fronteira `/webhook/messages`: verificação HMAC-SHA256 em tempo constante (`hmac.compare_digest`), janela anti-replay de 300s no header `X-Webhook-Timestamp`, desduplicação `SETNX` e roteamento automático para `dlq_unhandled_messages` após 3 falhas com backoff exponencial.

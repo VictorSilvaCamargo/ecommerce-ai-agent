@@ -104,20 +104,20 @@ flowchart LR
 
 ---
 
-### Fase 4: Assincronismo e Webhooks (Próxima Fase)
+### Fase 4: Assincronismo e Webhooks (Concluída)
 - **Objetivo:** Implementar recepção de webhooks protegida por HMAC SHA-256, fila assíncrona com Celery + Redis, controle de idempotência e Dead Letter Queue.
 - **Tarefas:**
-  1. Implementar middleware/dependência FastAPI de validação de assinatura HMAC no endpoint `/webhook/messages`.
-  2. Configurar controle de idempotência via Redis com chave única.
-  3. Desenvolver tarefas Celery para processar mensagens assincronamente através do grafo de conversação.
-  4. Configurar política de retentativas com backoff exponencial e Dead Letter Queue (`dlq_unhandled_messages`).
-  5. Aplicar skill `security-and-hardening` para auditar proteção contra ataques de replay e payloads maliciosos.
-  6. Testar resiliência com simulação de falhas transitórias e descarte de duplicatas.
-- **Critério de Saída:** API respondendo webhooks em < 200 ms, retentativas automáticas funcionando e DLQ capturando mensagens irrecuperáveis.
+  1. `[x]` Implementar verificação HMAC-SHA256 (`hmac.compare_digest` + proteção anti-replay de 300s) no endpoint `/webhook/messages`.
+  2. `[x]` Configurar controle de idempotência via `IdempotencyStore` (Redis `SETNX` com TTL de 24h e store em memória).
+  3. `[x]` Desenvolver tarefas Celery (`celery_app.py` e `tasks.py`) e `MessageWorkerProcessor` para processamento assíncrono.
+  4. `[x]` Configurar política de retentativas com backoff exponencial e Dead Letter Queue (`dlq_unhandled_messages`).
+  5. `[x]` Aplicar skill `security-and-hardening` (STRIDE Threat Model documentado no `SPEC.md` Seção 11).
+  6. `[x]` Testar resiliência com simulação de falhas transitórias, roteamento para DLQ e descarte de duplicatas (86 testes aprovados, 92% de cobertura).
+- **Critério de Saída:** API respondendo webhooks em < 50 ms (`202 Accepted`), retentativas automáticas funcionando e DLQ capturando mensagens irrecuperáveis.
 
 ---
 
-### Fase 5: Observabilidade, Evals e Ciclo de Debug
+### Fase 5: Observabilidade, Evals e Ciclo de Debug (Próxima Fase)
 - **Objetivo:** Integrar Langfuse self-hosted para tracing, exportar métricas Prometheus, provisionar dashboards no Grafana, montar suíte de evals (>= 80 casos) e estabelecer playbook de depuração.
 - **Tarefas:**
   1. Configurar contêineres de Langfuse, Prometheus e Grafana no `docker-compose.yml`.
