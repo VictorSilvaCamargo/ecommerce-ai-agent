@@ -108,3 +108,42 @@ Seguindo o processo de *Spec-Driven Development*, decompomos o sistema em módul
 - **Verificação Estrita de Tipos:** `uv run mypy --strict src`
 - **Contratos de Arquitetura:** `uv run lint-imports`
 - **Grafo de Conhecimento:** `graphify update .` e `graphify query "<pergunta>"`
+
+---
+
+## 7. Detalhamento da Fase 1: Fundação e API de Tools
+
+### 7.1 Contratos de Dados do Domínio (`src/atendente/domain/models.py`)
+- **`Customer`:** `id`, `name`, `doc_type` (`CPF` | `CNPJ`), `doc_number` (validado com dígitos verificadores oficiais), `segment` (`B2C` | `B2B`), `email`, `phone`, `created_at`.
+- **`Order`:** `id`, `customer_id`, `items: list[OrderItem]`, `total_cents`, `status` (`PROCESSING`, `SHIPPED`, `DELIVERED`, `CANCELLED`), `delivery_date: Optional[datetime]`, `tracking_code: Optional[str]`.
+- **`RefundRequest`:** `id`, `order_id`, `customer_id`, `reason: str`, `amount_cents: int`, `status` (`PENDING`, `APPROVED`, `REJECTED`), `eligible: bool`, `created_at: datetime`.
+- **`Ticket`:** `id`, `customer_id`, `title: str`, `description: str`, `priority` (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`), `sla_hours: int`, `status` (`OPEN`, `IN_PROGRESS`, `RESOLVED`), `created_at: datetime`.
+- **`ContractSLA`:** `id`, `customer_id`, `tier` (`GOLD`, `PLATINUM`, `ENTERPRISE`), `response_sla_minutes: int`, `resolution_sla_hours: int`, `account_manager: str`, `active: bool`.
+- **`Invoice`:** `id`, `customer_id`, `period: str`, `amount_cents: int`, `status` (`PAID`, `OPEN`, `OVERDUE`), `barcode: str`, `due_date: date`, `pdf_url: str`.
+
+### 7.2 Contratos e Validação das Tools (`src/atendente/tools/`)
+Toda Tool retorna a estrutura canônica `ToolResult[T]`:
+```python
+class ToolError(BaseModel):
+    code: str  # ex: "CONFIRMATION_REQUIRED", "ORDER_NOT_FOUND", "INELIGIBLE_REFUND"
+    message: str  # Mensagem amigável em pt-BR
+    retryable: bool  # Se o cliente ou LLM pode tentar novamente com novos parâmetros
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class ToolResult(BaseModel, Generic[T]):
+    success: bool
+    data: Optional[T] = None
+    error: Optional[ToolError] = None
+```
+
+- **Ação Sensível (`solicitar_reembolso`):**
+  - Parâmetros: `order_id`, `customer_id`, `motivo`, `confirmado: bool = False`.
+  - Se `confirmado == False`: retorna erro estruturado `code="CONFIRMATION_REQUIRED"`, com detalhes do pedido e valor a ser reembolsado para exibição ao usuário antes da confirmação.
+  - Regra de Negócio de Devolução: Elegível somente se o status for `DELIVERED` e a data de entrega tiver no máximo 7 dias corridos (Art. 49 CDC).
+
+### 7.3 Isolamento de Camadas (`.importlinter`)
+- Contrato 1: `domain` é núcleo puro (`domain` não importa `api`, `infra`, `agent`, `tools`, `rag`).
+- Contrato 2: `tools` depende de `domain` e `infra` (repositórios de auditoria), mas não importa `api` nem `agent`.
+- Contrato 3: `rag` não importa `api` nem `agent`.
+

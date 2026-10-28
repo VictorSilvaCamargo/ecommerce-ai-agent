@@ -1,0 +1,96 @@
+[project]
+name = "atendente-ia"
+version = "0.1.0"
+description = "Plataforma de Atendimento Inteligente com Agente LangGraph, RAG Híbrido e Arquitetura Hexagonal"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "greenlet>=3.1.0",
+    "alembic>=1.14.0",
+    "psycopg[binary]>=3.2.3",
+    "pgvector>=0.3.6",
+    "pymongo>=4.10.1",
+    "motor>=3.6.0",
+    "redis>=5.2.0",
+    "structlog>=24.4.0",
+    "httpx>=0.28.0",
+    "celery>=5.4.0",
+    "langgraph>=0.2.45",
+    "langchain-core>=0.3.15",
+    "mcp>=1.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "hypothesis>=6.120.0",
+    "respx>=0.22.0",
+    "import-linter>=2.1",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "types-redis>=4.6.0.20241004",
+    "aiosqlite>=0.20.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/atendente"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "B008"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+
+[[tool.mypy.overrides]]
+module = [
+    "motor.*",
+    "celery.*",
+    "pgvector.*",
+    "importlinter.*",
+    "langgraph.*",
+    "langchain_core.*",
+    "mcp.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "unit: Testes unitários puros sem I/O",
+    "integration: Testes de integração com banco de dados ou serviços",
+    "contract: Testes de contrato de OpenAPI e Function Calling",
+    "e2e: Testes de ponta a ponta",
+    "security: Testes de segurança e guardrails",
+    "live: Testes que necessitam de conexão real com serviços externos",
+]
