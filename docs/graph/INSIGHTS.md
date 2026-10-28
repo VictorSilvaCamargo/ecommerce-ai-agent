@@ -25,3 +25,11 @@ Registro evolutivo das métricas topológicas, nós centrais, acoplamentos e nó
 - **Acoplamentos e Conexões:** Camada `rag/` permanece estritamente isolada de `api/` e `agent/` (contrato comprovado no `import-linter`). `NovaLojaToolsService.buscar_base_conhecimento` consome `HybridRetriever` via injeção de dependência opcional sem acoplamento reverso.
 - **Módulos Órfãos / Fracos:** Subpastas `agent/`, `mcp_server/` e `workers/` continuam apenas com esqueletos, preparando a transição para a orquestração com LangGraph na Fase 3.
 - **Ajustes e Correções:** Adicionados filtro de stopwords em português e limiares de corte (cosseno >= 0.30, léxico >= 0.50) no `InMemoryVectorStore`/`HybridRetriever`, assegurando abstenção perfeita em perguntas fora de domínio com retorno de erro seguro `NO_RELEVANT_KNOWLEDGE` (`abstained=True`). Benchmark comprovou Configuração B (512 tokens / 64 overlap) com Hit Rate@3 = 0.90 e MRR = 0.90.
+
+---
+
+### Fase 3: Grafo de Conversação com LangGraph
+- **Nós Centrais:** `AgentNodeHandler` (29 arestas, despachante dos 8 nós funcionais) e `ConversationState` (27 arestas, estado unificado tipado) emergiram como God Nodes centrais da camada conversacional, conectando-se a `NovaLojaToolsService` (72 arestas).
+- **Acoplamentos e Conexões:** `agent` consome `tools` e `rag` respeitando a arquitetura hexagonal (3/3 contratos do `import-linter` rigorosamente preservados). Camada `infra/llm` disponibiliza abstração unificada `LLMClient` permitindo testes 100% determinísticos via `MockLLMClient`.
+- **Módulos Órfãos / Fracos:** Apenas `workers/` (Fase 4) e `mcp_server/` (Fase 6) permanecem com `__init__.py`.
+- **Ajustes e Correções:** Ciclo de `doubt-driven-development` identificou e neutralizou risco crítico de vazamento de confirmação (`action_confirmed` herdado entre turnos); gatekeeper agora exige estado estritamente pendente e intenção afirmativa no turno subsequente. Sumarização periódica e checkpointing no `MemorySaver` garantiram estabilidade e preservação contextual em conversas de 10+ turnos. Suíte ampliada para 71 testes com 91% de cobertura.
